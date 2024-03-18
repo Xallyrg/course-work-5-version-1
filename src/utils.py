@@ -64,10 +64,8 @@ def create_database(database_name: str, params: dict) -> None:
         # Удаляем на всякий случай БД и создаем её заново
         # (удаляем силовым методом, потому что pgAdmin так просто не закрывает соединение)
         try:
-            print('пытюсь удалить')
             cur.execute(f'DROP DATABASE {database_name} WITH (FORCE)')
         except:
-            print('не смог')
             pass
         finally:
             cur.execute(f'CREATE DATABASE {database_name}')
@@ -113,6 +111,66 @@ def save_data_to_database(data: list[dict[str, Any]], database_name: str, params
     :param params: параметры для подключения
     :return:
     """
+    # подключаемся к БД
+    conn = psycopg2.connect(dbname=database_name, **params)
+
+    with conn.cursor() as cur:
+        # Для каждой компании
+        for company in data:
+            # вытаскиваем данные
+            employer_name = company['employer']
+            employer_number_of_vacancies = company['number of vacancies']
+            # записываем данные о работодателе в таблицу employers
+            cur.execute(
+                """
+                INSERT INTO employers (employer_name, number_of_vacancies)
+                VALUES (%s, %s)
+                RETURNING employer_id
+                """,
+                (employer_name, employer_number_of_vacancies)
+            )
+
+            # Получаем номер, под которым записали работодателя и список его вакансий
+            employer_id = cur.fetchone()[0]
+            employer_vacancies = company['vacancies']
+            # для каждой вакансии работодателя
+            for vacancy in employer_vacancies:
+                # получаем данные --- название, зарплату, ссылку
+                vacansy_name = vacancy['name']
+
+                try:
+                    salary_from = int(vacancy["salary"]["from"])
+                except TypeError:
+                    salary_from = None
+                try:
+                    salary_to = int(vacancy["salary"]["to"])
+                except TypeError:
+                    salary_to = None
+                if salary_from != None:
+                    if salary_to != None:
+                        salary_to_print = f'Зарплата от {salary_from} до {salary_to}'
+                    else:
+                        salary_to_print = f'Зарплата от {salary_from}'
+                else:
+                    if salary_to != None:
+                        salary_to_print = f'Зарплата до {salary_to}'
+                    else:
+                        salary_to_print = f'Нет данных о зарплате'
+
+                url = vacancy['alternate_url']
+
+                # вставляем данные в БД
+                cur.execute(
+                    """
+                    INSERT INTO vacancies (employer_id, vacancy_name, salary_from, salary_to, salary_to_print, url)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    """,
+                    (employer_id, vacansy_name, salary_from, salary_to, salary_to_print, url)
+                )
+
+    conn.commit()
+    conn.close()
+
     return None
 
 
