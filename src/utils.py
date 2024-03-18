@@ -240,7 +240,7 @@ class DBManager():
         conn = psycopg2.connect(dbname=self.__database_name, **self.__params)
 
         with conn.cursor() as cur:
-            # Достаем нужные данные из таблицы employers
+            # Достаем нужные данные из таблицы vacancies
             cur.execute(
                 """
                 SELECT * FROM vacancies
@@ -270,7 +270,23 @@ class DBManager():
         '''
         :return: Возвращает среднюю зарплату по всем вакансиям
         '''
-        pass
+        conn = psycopg2.connect(dbname=self.__database_name, **self.__params)
+
+        with conn.cursor() as cur:
+            # Достаем нужные данные из таблицы vacancies
+            cur.execute(
+                """
+                SELECT AVG(salary_from) FROM vacancies
+                """
+            )
+
+            # Выводим данные в нормальном формате
+            data = float(cur.fetchall()[0][0])
+
+        conn.close()
+        return data
+
+
 
     def get_vacancies_with_higher_salary(self):
         '''

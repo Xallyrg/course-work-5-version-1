@@ -45,7 +45,10 @@ if __name__ == '__main__':
     # DB.get_companies_and_vacancies_count()
     # print(DB.get_companies_and_vacancies_count())
     # DB.get_all_vacancies()
-    print(len(DB.get_all_vacancies()))
+    # print(len(DB.get_all_vacancies()))
 
-    for dict in DB.get_all_vacancies():
-        print(dict)
+    DB.get_avg_salary()
+    print(DB.get_avg_salary())
+
+    # for dict in DB.get_all_vacancies():
+    #     print(dict)
