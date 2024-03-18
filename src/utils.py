@@ -327,4 +327,39 @@ class DBManager():
         '''
         :return: Возвращает список всех вакансий, в названии которых содержатся переданные в метод слова, например python
         '''
-        pass
+        list_of_vacancies = []
+        conn = psycopg2.connect(dbname=self.__database_name, **self.__params)
+
+        with conn.cursor() as cur:
+            # Составляем правильный запрос
+            request = ('SELECT * FROM vacancies\n'
+                       'JOIN employers USING (employer_id)\n'
+                       'WHERE ')
+            for word in keywords:
+                request += f"LOWER(vacancy_name) LIKE '%{word}%' OR\n"
+            request += f'1=0'
+
+            # Достаем нужные данные из таблицы vacancies
+            cur.execute(
+                f"""
+                    {request}
+                """
+            )
+
+            # Выводим данные в нормальном формате
+            data = cur.fetchall()
+            for row in data:
+                # print(f'Вакансия: {row[2]}, от компании компании {row[7]}.\n'
+                #       f'{row[5]}.\n'
+                #       f'Ссылка на вакансию {row[6]}')
+                list_of_vacancies.append({
+                    'Вакансия': row[2],
+                    'Компания': row[7],
+                    'Зарплата от': row[3],
+                    'Зарплата до': row[4],
+                    'Зарплата для печати': row[5],
+                    'Ссылка на вакансию': row[6]
+                })
+
+        conn.close()
+        return list_of_vacancies

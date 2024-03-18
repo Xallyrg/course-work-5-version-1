@@ -22,7 +22,7 @@ def main(lost_of_companies: list[str], db_name) -> None:
 if __name__ == '__main__':
     """
     Если вы запускаете программу не в первый раз, то закоментируйте строку 37. 
-    Отобрать нужные вакансии, можно со строки 41
+    Отобрать нужные вакансии, можно со строки 40
 
     Можете поправить данные перед запуском. 
     interesting_companies --- список компаний которые вам интересны.
@@ -36,19 +36,31 @@ if __name__ == '__main__':
     # скачивание данных
     # main(interesting_companies, database_name)
 
-    params = config()
-    # Ниже примеры, как можно из сформированной базы данных
-    DB = DBManager(database_name, params)
+    # Ниже примеры, как можно из сформированной базы данных получить какие-то конкретные значения
+    DB = DBManager(database_name, config())
 
-    # print(DB)
+    # Получить списком словарей названия компаний и количество вакансий в них
+    DB.get_companies_and_vacancies_count()
+    print(len(DB.get_companies_and_vacancies_count()))
 
-    # DB.get_companies_and_vacancies_count()
-    # print(DB.get_companies_and_vacancies_count())
-    # DB.get_all_vacancies()
-    # print(len(DB.get_all_vacancies()))
 
-    DB.get_vacancies_with_higher_salary()
-    print(DB.get_vacancies_with_higher_salary())
+    # Получить списком словарей все вакансии
+    DB.get_all_vacancies()
+    print(len(DB.get_all_vacancies()))
 
-    for dict in DB.get_vacancies_with_higher_salary():
+    # DB.get_vacancies_with_keyword(['водитель', 'инженер'])
+    # print(DB.get_vacancies_with_keyword(['водитель', 'инженер']))
+    # print(len(DB.get_vacancies_with_keyword(['водитель', 'инженер'])))
+
+    for dict in DB.get_vacancies_with_keyword(['водитель', 'инженер']):
         print(dict)
+
+    # keywords = ['водитель', 'инженер']
+    # request = ('SELECT * FROM vacancies\n'
+    #            'JOIN employers USING (employer_id)\n'
+    #            'WHERE ')
+    # for word in keywords:
+    #     request += f"LOWER(vacancy_name) LIKE '%{word}%' OR\n"
+    # request += f'1=0'
+    #
+    # print(request)
