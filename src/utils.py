@@ -8,9 +8,43 @@ def get_hh_data(list_of_companies: list[str]) -> list[dict[str, Any]]:
     '''
     Получает данные об интересующих компаниях с hh.ru с помощью requests и вакансии от них
     :param list_of_companies: список компаний
-    :return: полученные данные в формате словаря???
+    :return: полученные данные в формате словаря с двумя свойствами --- именем компании и списком её вакансий
     '''
+    # data это итоговый список
+    data = []
 
+    for company_name in list_of_companies:
+        print(f'Получаю данные о {company_name}')
+        # page это специальная переменная чтобы взять все результаты, data_for_company --- данные о конкретной компании
+        page = 0
+        data_for_company = []
+        # получаю ответ, добавляю в дату и посылаю следующий запрос с увеличением номера страницы на 1, чтобы достать все данные
+        while True:
+            params = {
+                "text": f"COMPANY_NAME:{company_name}",
+                "page": f"{page}",
+                "per_page": 100
+            }
+            response = requests.get(f"https://api.hh.ru/vacancies/", params=params)
+            hh_data = json.loads(response.text)
+            hh_vacancies = hh_data["items"]
+            if len(hh_vacancies) > 0:
+                data_for_company.extend(hh_vacancies)
+                page +=1
+                # print(f'Длина ответа 1 {len(hh_vacancies)}. Длина моих данных {len(data)}')
+            else:
+                break
+
+        print(f'Получил данные о {company_name}, вакансий {len(data_for_company)}')
+        data.append(
+            {
+                "employer": f"{company_name}",
+                "vacancies": data_for_company,
+                "number of vacancies": len(data_for_company)
+            }
+        )
+
+    return data
 
 
 def create_database(database_name: str, params: dict) -> None:

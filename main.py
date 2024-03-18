@@ -3,8 +3,8 @@ from config import config
 
 
 def main():
-    interesting_companies = ['Printum', 'Сбер Лигал', 'Яндекс.Такси', 'Яндекс Практикум', 'Яндекс.Еда',
-                             'Компания Самолет', 'HARTUNG', 'HeadHunter', 'SberTech', 'Ostrovok.ru', ]
+    interesting_companies = ['Printum', 'HARTUNG', 'Сбер Лигал', 'Яндекс.Такси', 'Яндекс Практикум', 'Яндекс.Еда',
+                             'Компания Самолет', 'SberTech', 'Ostrovok.ru', 'HeadHunter', ]
 
     params = config()
 
