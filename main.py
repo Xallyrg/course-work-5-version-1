@@ -47,8 +47,8 @@ if __name__ == '__main__':
     # DB.get_all_vacancies()
     # print(len(DB.get_all_vacancies()))
 
-    DB.get_avg_salary()
-    print(DB.get_avg_salary())
+    DB.get_vacancies_with_higher_salary()
+    print(DB.get_vacancies_with_higher_salary())
 
-    # for dict in DB.get_all_vacancies():
-    #     print(dict)
+    for dict in DB.get_vacancies_with_higher_salary():
+        print(dict)

@@ -32,7 +32,7 @@ def get_hh_data(list_of_companies: list[str]) -> list[dict[str, Any]]:
             # если от очередной страницы 0 ответов, то заканчиваю цикл, иначе сохраняю данные и page +=1
             if len(hh_vacancies) > 0:
                 data_for_company.extend(hh_vacancies)
-                page +=1
+                page += 1
                 # print(f'Длина ответа 1 {len(hh_vacancies)}. Длина моих данных {len(data)}')
             else:
                 break
@@ -178,6 +178,7 @@ class DBManager():
     """
     Класс для получения и вывода данных из базы данных с вакансиями
     """
+
     def __init__(self, database_name: str, params: dict):
         '''Создавая класс спрашиваем имя БД'''
         self.__database_name = database_name
@@ -205,25 +206,25 @@ class DBManager():
         '''
         :return: Возвращает список всех компаний и количество вакансий в каждой из них
         '''
-        conn = psycopg2.connect(dbname = self.__database_name, **self.__params)
+        conn = psycopg2.connect(dbname=self.__database_name, **self.__params)
         list_of_companies = []
 
         with conn.cursor() as cur:
             # Достаем нужные данные из таблицы employers
-                cur.execute(
-                    """
-                    SELECT * FROM employers
-                    """
-                )
+            cur.execute(
+                """
+                SELECT * FROM employers
+                """
+            )
 
-                # Сохраняем данные в нормальном формате
-                data = cur.fetchall()
-                for row in data:
-                    # print(f'Название компании: {row[1]}, количество вакансий {row[2]}')
-                    list_of_companies.append({
-                        'Название компании': row[1],
-                        'Количество вакансий': row[2]
-                    })
+            # Сохраняем данные в нормальном формате
+            data = cur.fetchall()
+            for row in data:
+                # print(f'Название компании: {row[1]}, количество вакансий {row[2]}')
+                list_of_companies.append({
+                    'Название компании': row[1],
+                    'Количество вакансий': row[2]
+                })
 
         conn.close()
         return list_of_companies
@@ -268,7 +269,7 @@ class DBManager():
 
     def get_avg_salary(self):
         '''
-        :return: Возвращает среднюю зарплату по всем вакансиям
+        :return: Возвращает среднюю зарплату по всем вакансиям по нижней границе зарплат
         '''
         conn = psycopg2.connect(dbname=self.__database_name, **self.__params)
 
@@ -286,20 +287,44 @@ class DBManager():
         conn.close()
         return data
 
-
-
     def get_vacancies_with_higher_salary(self):
         '''
         :return: Возвращает список всех вакансий, у которых зарплата выше средней по всем вакансиям.
         '''
-        pass
+        list_of_vacancies = []
+        conn = psycopg2.connect(dbname=self.__database_name, **self.__params)
+
+        with conn.cursor() as cur:
+            # Достаем нужные данные из таблицы vacancies
+            cur.execute(
+                f"""
+                SELECT * FROM vacancies
+                JOIN employers USING (employer_id)
+                WHERE salary_from > (SELECT AVG(salary_from) FROM vacancies)
+                ORDER BY salary_from DESC
+                """
+            )
+
+            # Выводим данные в нормальном формате
+            data = cur.fetchall()
+            for row in data:
+                # print(f'Вакансия: {row[2]}, от компании компании {row[7]}.\n'
+                #       f'{row[5]}.\n'
+                #       f'Ссылка на вакансию {row[6]}')
+                list_of_vacancies.append({
+                    'Вакансия': row[2],
+                    'Компания': row[7],
+                    'Зарплата от': row[3],
+                    'Зарплата до': row[4],
+                    'Зарплата для печати': row[5],
+                    'Ссылка на вакансию': row[6]
+                })
+
+        conn.close()
+        return list_of_vacancies
 
     def get_vacancies_with_keyword(self, keywords: list[str]):
         '''
         :return: Возвращает список всех вакансий, в названии которых содержатся переданные в метод слова, например python
         '''
         pass
-
-
-
-
