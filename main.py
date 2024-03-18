@@ -4,7 +4,7 @@ from config import config
 
 def main(lost_of_companies: list[str], db_name) -> None:
     """
-    Программа скачает вам вакансии компаний из списка,
+    Функция скачает вам вакансии компаний из списка,
     пересоздаст базу данных db_name
     и запишет найденные данные в нее
     :param lost_of_companies: список компаний
@@ -30,7 +30,8 @@ if __name__ == '__main__':
     
     В процессе скачивания данных программа будет выводить информацию о своем прогрессе
     """
-    interesting_companies = ['Printum', 'HARTUNG', 'Сбер Лигал', 'Яндекс.Такси', 'Яндекс Практикум', 'Яндекс.Еда', 'Компания Самолет', 'SberTech', 'Ostrovok.ru', 'HeadHunter', ]
+    interesting_companies = ['Printum', 'HARTUNG', 'Сбер Лигал', 'Яндекс.Такси', 'Яндекс Практикум',
+                             'Яндекс.Еда', 'Компания Самолет', 'SberTech', 'Ostrovok.ru', 'HeadHunter', ]
     database_name = 'hh_vacansies'
 
     # скачивание данных
@@ -60,18 +61,3 @@ if __name__ == '__main__':
     keywords = ['водитель', 'инженер']
     DB.get_vacancies_with_keyword(keywords)
     print(f'Вакансий в названии которых встречаются слова "{'", "'.join(keywords)}": {len(DB.get_vacancies_with_keyword(keywords))}')
-    # print(DB.get_vacancies_with_keyword(['водитель', 'инженер']))
-    # print(len(DB.get_vacancies_with_keyword(['водитель', 'инженер'])))
-
-    # for dict in DB.get_vacancies_with_keyword(['водитель', 'инженер']):
-    #     print(dict)
-
-    # keywords = ['водитель', 'инженер']
-    # request = ('SELECT * FROM vacancies\n'
-    #            'JOIN employers USING (employer_id)\n'
-    #            'WHERE ')
-    # for word in keywords:
-    #     request += f"LOWER(vacancy_name) LIKE '%{word}%' OR\n"
-    # request += f'1=0'
-    #
-    # print(request)
