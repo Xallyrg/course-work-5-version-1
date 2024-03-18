@@ -331,12 +331,15 @@ class DBManager():
         conn = psycopg2.connect(dbname=self.__database_name, **self.__params)
 
         with conn.cursor() as cur:
-            # Составляем правильный запрос
+            # Составляем правильный запрос, чтобы найти все без повторений
+            # и не включать слова, которые находятся внутри других слов
             request = ('SELECT * FROM vacancies\n'
                        'JOIN employers USING (employer_id)\n'
                        'WHERE ')
             for word in keywords:
-                request += f"LOWER(vacancy_name) LIKE '%{word}%' OR\n"
+                request += (f"LOWER(vacancy_name) LIKE '% {word} %' OR "
+                            f"LOWER(vacancy_name) LIKE '{word} %' OR "
+                            f"LOWER(vacancy_name) LIKE '% {word}' OR\n")
             request += f'1=0'
 
             # Достаем нужные данные из таблицы vacancies
