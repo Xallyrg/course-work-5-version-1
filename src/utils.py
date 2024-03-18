@@ -13,6 +13,7 @@ def get_hh_data(list_of_companies: list[str]) -> list[dict[str, Any]]:
     # data это итоговый список
     data = []
 
+    # для каждой компании в списке
     for company_name in list_of_companies:
         print(f'Получаю данные о {company_name}')
         # page это специальная переменная чтобы взять все результаты, data_for_company --- данные о конкретной компании
@@ -28,6 +29,7 @@ def get_hh_data(list_of_companies: list[str]) -> list[dict[str, Any]]:
             response = requests.get(f"https://api.hh.ru/vacancies/", params=params)
             hh_data = json.loads(response.text)
             hh_vacancies = hh_data["items"]
+            # если от очередной страницы 0 ответов, то заканчиваю цикл, иначе сохраняю данные и page +=1
             if len(hh_vacancies) > 0:
                 data_for_company.extend(hh_vacancies)
                 page +=1
@@ -35,6 +37,7 @@ def get_hh_data(list_of_companies: list[str]) -> list[dict[str, Any]]:
             else:
                 break
 
+        # добавляю словарь компании и перехожу к следующей
         print(f'Получил данные о {company_name}, вакансий {len(data_for_company)}')
         data.append(
             {
