@@ -155,7 +155,7 @@ def save_data_to_database(data: list[dict[str, Any]], database_name: str, params
                     if salary_to != None:
                         salary_to_print = f'Зарплата до {salary_to}'
                     else:
-                        salary_to_print = f'Нет данных о зарплате'
+                        salary_to_print = f'Зарплата не указана'
 
                 url = vacancy['alternate_url']
 
@@ -206,6 +206,7 @@ class DBManager():
         :return: Возвращает список всех компаний и количество вакансий в каждой из них
         '''
         conn = psycopg2.connect(dbname = self.__database_name, **self.__params)
+        list_of_companies = []
 
         with conn.cursor() as cur:
             # Достаем нужные данные из таблицы employers
@@ -215,12 +216,17 @@ class DBManager():
                     """
                 )
 
-                # Выводим данные в нормальном формате
+                # Сохраняем данные в нормальном формате
                 data = cur.fetchall()
                 for row in data:
-                    print(f'Название компании: {row[1]}, количество вакансий {row[2]}')
+                    # print(f'Название компании: {row[1]}, количество вакансий {row[2]}')
+                    list_of_companies.append({
+                        'Название компании': row[1],
+                        'Количество вакансий': row[2]
+                    })
 
         conn.close()
+        return list_of_companies
 
     def get_all_vacancies(self):
         '''
@@ -230,64 +236,35 @@ class DBManager():
         зарплату
         ссылку на вакансию
         '''
-        conn = psycopg2.connect(dbname=database_name, **params)
+        list_of_vacancies = []
+        conn = psycopg2.connect(dbname=self.__database_name, **self.__params)
 
         with conn.cursor() as cur:
-            # Для каждой компании
-            for company in data:
-                # вытаскиваем данные
-                employer_name = company['employer']
-                employer_number_of_vacancies = company['number of vacancies']
-                # записываем данные о работодателе в таблицу employers
-                cur.execute(
-                    """
-                    INSERT INTO employers (employer_name, number_of_vacancies)
-                    VALUES (%s, %s)
-                    RETURNING employer_id
-                    """,
-                    (employer_name, employer_number_of_vacancies)
-                )
+            # Достаем нужные данные из таблицы employers
+            cur.execute(
+                """
+                SELECT * FROM vacancies
+                JOIN employers USING (employer_id) 
+                """
+            )
 
-                # Получаем номер, под которым записали работодателя и список его вакансий
-                employer_id = cur.fetchone()[0]
-                employer_vacancies = company['vacancies']
-                # для каждой вакансии работодателя
-                for vacancy in employer_vacancies:
-                    # получаем данные --- название, зарплату, ссылку
-                    vacansy_name = vacancy['name']
+            # Выводим данные в нормальном формате
+            data = cur.fetchall()
+            for row in data:
+                # print(f'Вакансия: {row[2]}, от компании компании {row[7]}.\n'
+                #       f'{row[5]}.\n'
+                #       f'Ссылка на вакансию {row[6]}')
+                list_of_vacancies.append({
+                    'Вакансия': row[2],
+                    'Компания': row[7],
+                    'Зарплата от': row[3],
+                    'Зарплата до': row[4],
+                    'Зарплата для печати': row[5],
+                    'Ссылка на вакансию': row[6]
+                })
 
-                    try:
-                        salary_from = int(vacancy["salary"]["from"])
-                    except TypeError:
-                        salary_from = None
-                    try:
-                        salary_to = int(vacancy["salary"]["to"])
-                    except TypeError:
-                        salary_to = None
-                    if salary_from != None:
-                        if salary_to != None:
-                            salary_to_print = f'Зарплата от {salary_from} до {salary_to}'
-                        else:
-                            salary_to_print = f'Зарплата от {salary_from}'
-                    else:
-                        if salary_to != None:
-                            salary_to_print = f'Зарплата до {salary_to}'
-                        else:
-                            salary_to_print = f'Нет данных о зарплате'
-
-                    url = vacancy['alternate_url']
-
-                    # вставляем данные в БД
-                    cur.execute(
-                        """
-                        INSERT INTO vacancies (employer_id, vacancy_name, salary_from, salary_to, salary_to_print, url)
-                        VALUES (%s, %s, %s, %s, %s, %s)
-                        """,
-                        (employer_id, vacansy_name, salary_from, salary_to, salary_to_print, url)
-                    )
-
-        conn.commit()
         conn.close()
+        return list_of_vacancies
 
     def get_avg_salary(self):
         '''

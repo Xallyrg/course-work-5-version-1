@@ -34,11 +34,18 @@ if __name__ == '__main__':
     database_name = 'hh_vacansies'
 
     # скачивание данных
-    main(interesting_companies, database_name)
+    # main(interesting_companies, database_name)
 
-
-
+    params = config()
     # Ниже примеры, как можно из сформированной базы данных
-    # DB = DBManager('hh_vacansies')
+    DB = DBManager(database_name, params)
 
     # print(DB)
+
+    # DB.get_companies_and_vacancies_count()
+    # print(DB.get_companies_and_vacancies_count())
+    # DB.get_all_vacancies()
+    print(len(DB.get_all_vacancies()))
+
+    for dict in DB.get_all_vacancies():
+        print(dict)
