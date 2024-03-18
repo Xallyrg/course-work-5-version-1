@@ -178,14 +178,20 @@ class DBManager():
     """
     Класс для получения и вывода данных из базы данных с вакансиями
     """
-    def __init__(self, database_name: str):
+    def __init__(self, database_name: str, params: dict):
         '''Создавая класс спрашиваем имя БД'''
         self.__database_name = database_name
+        self.__params = params
 
     @property
     def database_name(self):
         '''Запрещаем менять имя БД'''
         return self.__database_name
+
+    @property
+    def params(self):
+        '''Запрещаем менять параметры подключения'''
+        return self.__params
 
     def __repr__(self):
         '''Магический метод репр'''
@@ -199,7 +205,22 @@ class DBManager():
         '''
         :return: Возвращает список всех компаний и количество вакансий в каждой из них
         '''
-        pass
+        conn = psycopg2.connect(dbname = self.__database_name, **self.__params)
+
+        with conn.cursor() as cur:
+            # Достаем нужные данные из таблицы employers
+                cur.execute(
+                    """
+                    SELECT * FROM employers
+                    """
+                )
+
+                # Выводим данные в нормальном формате
+                data = cur.fetchall()
+                for row in data:
+                    print(f'Название компании: {row[1]}, количество вакансий {row[2]}')
+
+        conn.close()
 
     def get_all_vacancies(self):
         '''
@@ -209,7 +230,64 @@ class DBManager():
         зарплату
         ссылку на вакансию
         '''
-        pass
+        conn = psycopg2.connect(dbname=database_name, **params)
+
+        with conn.cursor() as cur:
+            # Для каждой компании
+            for company in data:
+                # вытаскиваем данные
+                employer_name = company['employer']
+                employer_number_of_vacancies = company['number of vacancies']
+                # записываем данные о работодателе в таблицу employers
+                cur.execute(
+                    """
+                    INSERT INTO employers (employer_name, number_of_vacancies)
+                    VALUES (%s, %s)
+                    RETURNING employer_id
+                    """,
+                    (employer_name, employer_number_of_vacancies)
+                )
+
+                # Получаем номер, под которым записали работодателя и список его вакансий
+                employer_id = cur.fetchone()[0]
+                employer_vacancies = company['vacancies']
+                # для каждой вакансии работодателя
+                for vacancy in employer_vacancies:
+                    # получаем данные --- название, зарплату, ссылку
+                    vacansy_name = vacancy['name']
+
+                    try:
+                        salary_from = int(vacancy["salary"]["from"])
+                    except TypeError:
+                        salary_from = None
+                    try:
+                        salary_to = int(vacancy["salary"]["to"])
+                    except TypeError:
+                        salary_to = None
+                    if salary_from != None:
+                        if salary_to != None:
+                            salary_to_print = f'Зарплата от {salary_from} до {salary_to}'
+                        else:
+                            salary_to_print = f'Зарплата от {salary_from}'
+                    else:
+                        if salary_to != None:
+                            salary_to_print = f'Зарплата до {salary_to}'
+                        else:
+                            salary_to_print = f'Нет данных о зарплате'
+
+                    url = vacancy['alternate_url']
+
+                    # вставляем данные в БД
+                    cur.execute(
+                        """
+                        INSERT INTO vacancies (employer_id, vacancy_name, salary_from, salary_to, salary_to_print, url)
+                        VALUES (%s, %s, %s, %s, %s, %s)
+                        """,
+                        (employer_id, vacansy_name, salary_from, salary_to, salary_to_print, url)
+                    )
+
+        conn.commit()
+        conn.close()
 
     def get_avg_salary(self):
         '''
@@ -228,3 +306,7 @@ class DBManager():
         :return: Возвращает список всех вакансий, в названии которых содержатся переданные в метод слова, например python
         '''
         pass
+
+
+
+
