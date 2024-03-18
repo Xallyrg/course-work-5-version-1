@@ -34,26 +34,37 @@ if __name__ == '__main__':
     database_name = 'hh_vacansies'
 
     # скачивание данных
-    # main(interesting_companies, database_name)
+    main(interesting_companies, database_name)
 
     # Ниже примеры, как можно из сформированной базы данных получить какие-то конкретные значения
     DB = DBManager(database_name, config())
+    print('')
 
     # Получить списком словарей названия компаний и количество вакансий в них
     DB.get_companies_and_vacancies_count()
-    print(len(DB.get_companies_and_vacancies_count()))
-
+    print(f'Всего компаний: {len(DB.get_companies_and_vacancies_count())}')
 
     # Получить списком словарей все вакансии
     DB.get_all_vacancies()
-    print(len(DB.get_all_vacancies()))
+    print(f'Всего вакансий: {len(DB.get_all_vacancies())}')
 
-    # DB.get_vacancies_with_keyword(['водитель', 'инженер'])
+    # Получить среднюю минимальную зарплату по вакансиям в которых она указана
+    DB.get_avg_salary()
+    print(f'Средняя зарплата по вакансиям: {int(DB.get_avg_salary())}')
+
+    # Получить списком словарей все вакансии у которых минимальная ЗП больше средней
+    DB.get_vacancies_with_higher_salary()
+    print(f'Вакансий с высокой зарплатой: {len(DB.get_vacancies_with_higher_salary())}')
+
+    # Получить списком словарей все вакансии в названии которых встречаются слова
+    keywords = ['водитель', 'инженер']
+    DB.get_vacancies_with_keyword(keywords)
+    print(f'Вакансий в названии которых встречаются слова "{'", "'.join(keywords)}": {len(DB.get_vacancies_with_keyword(keywords))}')
     # print(DB.get_vacancies_with_keyword(['водитель', 'инженер']))
     # print(len(DB.get_vacancies_with_keyword(['водитель', 'инженер'])))
 
-    for dict in DB.get_vacancies_with_keyword(['водитель', 'инженер']):
-        print(dict)
+    # for dict in DB.get_vacancies_with_keyword(['водитель', 'инженер']):
+    #     print(dict)
 
     # keywords = ['водитель', 'инженер']
     # request = ('SELECT * FROM vacancies\n'
