@@ -15,15 +15,14 @@ def main(lost_of_companies: list[str], db_name) -> None:
     params = config()
 
     data = get_hh_data(lost_of_companies)
-    print(len(data))
-    create_database(db_name, params)
+    # create_database(db_name, params)
     save_data_to_database(data, db_name, params)
 
 
 if __name__ == '__main__':
     """
     Если вы запускаете программу не в первый раз, то закоментируйте строку 39. 
-    Если вы хотите отобрать нужные вакансии, сразу переходить к строке __
+    Отобрать нужные вакансии, можно со строки 43
 
     Можете поправить данные перед запуском. 
     interesting_companies --- список компаний которые вам интересны.
@@ -32,7 +31,8 @@ if __name__ == '__main__':
     В процессе скачивания данных программа будет выводить информацию о своем прогрессе
     """
     # interesting_companies = ['Printum', 'HARTUNG', 'Сбер Лигал', 'Яндекс.Такси', 'Яндекс Практикум', 'Яндекс.Еда', 'Компания Самолет', 'SberTech', 'Ostrovok.ru', 'HeadHunter', ]
-    interesting_companies = ['Printum', 'HARTUNG', 'Сбер Лигал', 'Яндекс Практикум', 'Ostrovok.ru', 'HeadHunter', ]
+    # interesting_companies = ['Printum', 'HARTUNG', 'Сбер Лигал', 'Яндекс Практикум', 'Ostrovok.ru', 'HeadHunter', ]
+    interesting_companies = ['Printum', 'HARTUNG',]
     database_name = 'hh_vacansies'
 
     # скачивание данных

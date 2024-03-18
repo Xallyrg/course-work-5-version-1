@@ -57,6 +57,51 @@ def create_database(database_name: str, params: dict) -> None:
     :param params: параметры для подключения
     :return:
     """
+    # подключаемся к постгресс чтобы создать нужную БД
+    conn = psycopg2.connect(dbname='postgres', **params)
+    conn.autocommit = True
+    with conn.cursor() as cur:
+        # Удаляем на всякий случай БД и создаем её заново
+        # (удаляем силовым методом, потому что pgAdmin так просто не закрывает соединение)
+        try:
+            print('пытюсь удалить')
+            cur.execute(f'DROP DATABASE {database_name} WITH (FORCE)')
+        except:
+            print('не смог')
+            pass
+        finally:
+            cur.execute(f'CREATE DATABASE {database_name}')
+    conn.close()
+
+    # Теперь подключаемся к БД и создаем там две таблицы
+    conn = psycopg2.connect(dbname=database_name, **params)
+
+    with conn.cursor() as cur:
+        cur.execute("""
+                CREATE TABLE employers (
+                    employer_id serial PRIMARY KEY,
+                    employer_name VARCHAR NOT NULL,
+                    number_of_vacancies integer NOT NULL
+                );
+            """)
+
+    with conn.cursor() as cur:
+        cur.execute("""
+                CREATE TABLE public.vacancies(
+                    vacancy_id SERIAL PRIMARY KEY,
+                    employer_id integer NOT NULL,
+                    vacancy_name VARCHAR NOT NULL,
+                    salary_from integer,
+                    salary_to integer,
+                    salary_to_print VARCHAR NOT NULL,
+                    url VARCHAR NOT NULL,
+                    CONSTRAINT fk_vacancies_employers FOREIGN KEY (employer_id) REFERENCES employers (employer_id)
+                );
+            """)
+
+    conn.commit()
+    conn.close()
+
     return None
 
 
