@@ -1,7 +1,4 @@
-# course-work-5-version-1
-SkyPro 5 module course work headhunter vacancies, 1st version
-
-Курсовая работа по курсу "работа с базами данных" от SkyPro
+# Проект по работе с API hh.ru и базами данных
 
 Это проект, который по набору интересующих вакансий 
 (переменная interesting_companies) и желаемому 
